@@ -6,59 +6,69 @@ interface DifficultySelectorProps {
   onSelect: (config: DifficultyConfig) => void;
 }
 
-const BADGE_COLORS: Record<DifficultyLevel, string> = {
-  easy: "bg-green-100 text-green-700 border-green-300",
-  medium: "bg-yellow-100 text-yellow-700 border-yellow-300",
-  hard: "bg-red-100 text-red-700 border-red-300",
-};
-
-const BUTTON_COLORS: Record<DifficultyLevel, string> = {
-  easy:
-    "bg-green-600 hover:bg-green-700 active:bg-green-800 border-green-700 shadow-green-200",
-  medium:
-    "bg-yellow-500 hover:bg-yellow-600 active:bg-yellow-700 border-yellow-600 shadow-yellow-200",
-  hard:
-    "bg-red-600 hover:bg-red-700 active:bg-red-800 border-red-700 shadow-red-200",
+const BUTTON_STYLES: Record<DifficultyLevel, {
+  base: string;
+  icon: string;
+  grid: string;
+}> = {
+  easy: {
+    base: "bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 border-emerald-700 shadow-emerald-200 focus-visible:ring-emerald-400",
+    icon: "🌿",
+    grid: "3×4",
+  },
+  medium: {
+    base: "bg-amber-500 hover:bg-amber-400 active:bg-amber-600 border-amber-600 shadow-amber-200 focus-visible:ring-amber-400",
+    icon: "⚡",
+    grid: "4×4",
+  },
+  hard: {
+    base: "bg-rose-600 hover:bg-rose-500 active:bg-rose-700 border-rose-700 shadow-rose-200 focus-visible:ring-rose-400",
+    icon: "🔥",
+    grid: "5×6",
+  },
 };
 
 export default function DifficultySelector({ onSelect }: DifficultySelectorProps) {
   const difficulties = Object.values(DIFFICULTY_CONFIGS);
 
   return (
-    <div className="flex flex-col items-center gap-6 w-full max-w-md px-4">
+    <div className="flex flex-col items-center gap-6 w-full max-w-md px-4 screen-enter">
       <div className="text-center space-y-1">
         <h2 className="text-2xl font-bold text-indigo-700">Choose Difficulty</h2>
         <p className="text-gray-500 text-sm">Select a grid size to start the game</p>
       </div>
 
-      <div className="flex flex-col gap-4 w-full">
-        {difficulties.map((config) => (
-          <button
-            key={config.level}
-            onClick={() => onSelect(config)}
-            className={
-              "w-full flex items-center justify-between px-6 py-4 rounded-2xl border-2 text-white font-semibold shadow-md transition-all duration-200 cursor-pointer " +
-              BUTTON_COLORS[config.level]
-            }
-            aria-label={
-              config.label + " difficulty: " + config.description
-            }
-          >
-            <div className="flex flex-col items-start gap-0.5">
-              <span className="text-xl font-bold">{config.label}</span>
-              <span className="text-sm font-normal opacity-90">
-                {config.description}
-              </span>
-            </div>
-            <span
+      <div className="flex flex-col gap-3 sm:gap-4 w-full">
+        {difficulties.map((config, i) => {
+          const style = BUTTON_STYLES[config.level];
+          return (
+            <button
+              key={config.level}
+              onClick={() => onSelect(config)}
               className={
-                "text-xs font-semibold px-2 py-1 rounded-full border bg-white/20 border-white/40"
+                "w-full flex items-center justify-between px-5 py-4 rounded-2xl border-2 text-white font-semibold shadow-md " +
+                "transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 " +
+                "screen-enter " +
+                style.base
               }
+              style={{ animationDelay: `${i * 60}ms` }}
+              aria-label={config.label + " difficulty: " + config.description}
             >
-              {config.cols}×{config.rows}
-            </span>
-          </button>
-        ))}
+              <div className="flex items-center gap-3">
+                <span className="text-2xl" aria-hidden="true">{style.icon}</span>
+                <div className="flex flex-col items-start gap-0.5">
+                  <span className="text-lg sm:text-xl font-bold">{config.label}</span>
+                  <span className="text-sm font-normal opacity-90">
+                    {config.description}
+                  </span>
+                </div>
+              </div>
+              <span className="text-xs font-bold px-2.5 py-1.5 rounded-xl bg-white/20 border border-white/30 whitespace-nowrap">
+                {style.grid}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
