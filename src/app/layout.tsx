@@ -5,8 +5,14 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Memory Match",
-  description: "A fun memory card matching game",
+  title: "Memory Match – Find the Pairs",
+  description: "A fun and polished memory card matching game. Flip cards to find matching pairs!",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+  },
 };
 
 export default function RootLayout({
