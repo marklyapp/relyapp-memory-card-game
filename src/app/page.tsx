@@ -1,6 +1,13 @@
-import GameBoard from "./components/GameBoard";
+"use client";
+
+import { useState } from 'react';
+import GameBoard from './components/GameBoard';
+import DifficultySelector from './components/DifficultySelector';
+import { DifficultyConfig } from './lib/types';
 
 export default function Home() {
+  const [difficulty, setDifficulty] = useState<DifficultyConfig | null>(null);
+
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50 py-12">
       <div className="flex flex-col items-center gap-8 w-full">
@@ -12,7 +19,15 @@ export default function Home() {
             Flip the cards. Find the pairs.
           </p>
         </div>
-        <GameBoard />
+
+        {difficulty === null ? (
+          <DifficultySelector onSelect={setDifficulty} />
+        ) : (
+          <GameBoard
+            difficulty={difficulty}
+            onChangeDifficulty={() => setDifficulty(null)}
+          />
+        )}
       </div>
     </main>
   );

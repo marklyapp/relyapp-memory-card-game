@@ -2,20 +2,39 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import Card from './Card';
-import { CardType } from '../lib/types';
+import { CardType, DifficultyConfig } from '../lib/types';
 import { createShuffledDeck } from '../lib/deck';
 
-export default function GameBoard() {
+interface GameBoardProps {
+  difficulty: DifficultyConfig;
+  onChangeDifficulty: () => void;
+}
+
+// Map column count to a Tailwind grid-cols class
+function gridColsClass(cols: number): string {
+  const map: Record<number, string> = {
+    3: 'grid-cols-3',
+    4: 'grid-cols-4',
+    5: 'grid-cols-5',
+  };
+  return map[cols] ?? 'grid-cols-4';
+}
+
+export default function GameBoard({ difficulty, onChangeDifficulty }: GameBoardProps) {
   const [cards, setCards] = useState<CardType[]>([]);
   const [flippedIds, setFlippedIds] = useState<number[]>([]);
   const [isChecking, setIsChecking] = useState(false);
   const [moves, setMoves] = useState(0);
   const [hasWon, setHasWon] = useState(false);
 
-  // Initialize deck on mount
+  // Initialize deck when difficulty changes
   useEffect(() => {
-    setCards(createShuffledDeck());
-  }, []);
+    setCards(createShuffledDeck(difficulty.pairs));
+    setFlippedIds([]);
+    setIsChecking(false);
+    setMoves(0);
+    setHasWon(false);
+  }, [difficulty]);
 
   // Check win condition whenever cards change
   useEffect(() => {
@@ -84,7 +103,7 @@ export default function GameBoard() {
   );
 
   const handleRestart = () => {
-    setCards(createShuffledDeck());
+    setCards(createShuffledDeck(difficulty.pairs));
     setFlippedIds([]);
     setIsChecking(false);
     setMoves(0);
@@ -92,11 +111,13 @@ export default function GameBoard() {
   };
 
   const matchedCount = cards.filter((c) => c.isMatched).length / 2;
-  const totalPairs = cards.length / 2;
+  const totalPairs = difficulty.pairs;
   const isDisabled = isChecking || flippedIds.length >= 2;
+  const colsClass = gridColsClass(difficulty.cols);
+  const compact = difficulty.level === "hard";
 
   return (
-    <div className="flex flex-col items-center gap-6 w-full max-w-lg px-4">
+    <div className="flex flex-col items-center gap-6 w-full max-w-2xl px-4">
       {/* Header */}
       <div className="flex items-center justify-between w-full">
         <div className="flex flex-col text-sm text-gray-500">
@@ -105,12 +126,25 @@ export default function GameBoard() {
             Pairs: {matchedCount}/{totalPairs}
           </span>
         </div>
-        <button
-          onClick={handleRestart}
-          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold rounded-xl shadow transition-colors duration-200 cursor-pointer text-sm"
-        >
-          New Game
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onChangeDifficulty}
+            className="px-3 py-2 bg-white hover:bg-gray-50 active:bg-gray-100 text-indigo-600 font-semibold rounded-xl shadow border border-indigo-200 transition-colors duration-200 cursor-pointer text-sm"
+          >
+            ← Difficulty
+          </button>
+          <button
+            onClick={handleRestart}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold rounded-xl shadow transition-colors duration-200 cursor-pointer text-sm"
+          >
+            New Game
+          </button>
+        </div>
+      </div>
+
+      {/* Difficulty badge */}
+      <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">
+        {difficulty.label} — {difficulty.description}
       </div>
 
       {/* Win banner */}
@@ -124,18 +158,26 @@ export default function GameBoard() {
           <p className="text-gray-600 mt-1">
             Completed in <strong>{moves}</strong> moves
           </p>
-          <button
-            onClick={handleRestart}
-            className="mt-4 px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl shadow transition-colors duration-200 cursor-pointer"
-          >
-            Play Again
-          </button>
+          <div className="flex justify-center gap-3 mt-4">
+            <button
+              onClick={onChangeDifficulty}
+              className="px-5 py-2 bg-white hover:bg-gray-50 border border-indigo-300 text-indigo-600 font-semibold rounded-xl shadow transition-colors duration-200 cursor-pointer"
+            >
+              Change Difficulty
+            </button>
+            <button
+              onClick={handleRestart}
+              className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl shadow transition-colors duration-200 cursor-pointer"
+            >
+              Play Again
+            </button>
+          </div>
         </div>
       )}
 
       {/* Card grid */}
       <div
-        className="grid grid-cols-4 gap-3 sm:gap-4"
+        className={"grid " + colsClass + " gap-2 sm:gap-3"}
         role="grid"
         aria-label="Memory card game board"
         aria-describedby="game-instructions"
@@ -146,6 +188,7 @@ export default function GameBoard() {
             card={card}
             onClick={handleCardClick}
             disabled={isDisabled}
+            compact={compact}
           />
         ))}
       </div>

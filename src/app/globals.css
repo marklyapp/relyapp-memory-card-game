@@ -19,6 +19,19 @@
   }
 }
 
+/* Compact variant for larger grids (Hard difficulty) */
+.card-scene-compact {
+  width: 52px;
+  height: 74px;
+}
+
+@media (min-width: 640px) {
+  .card-scene-compact {
+    width: 68px;
+    height: 96px;
+  }
+}
+
 .card-inner {
   position: relative;
   width: 100%;
